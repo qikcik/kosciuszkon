@@ -3,8 +3,11 @@ class MemeViewer extends HTMLElement {
         this.inner = this.attachShadow({ mode: "open" });
         this.Update();
     }
-    Construct(data) {
-        this.data = data;
+    async Focus() {
+        const left = this.inner.querySelectorAll(`single-mem`);
+        if(left.length < 3) {
+            this.loadMoreMeme();
+        }
     }
 
     Update() {
@@ -27,15 +30,12 @@ class MemeViewer extends HTMLElement {
         `;
 
         this.connectGesture();
+        this.resetResponse();
+    }
 
-        this.data.forEach(x => {
-            this.createSingleMemeView(x);
-        });
-
-        this.response = {
-            liked: [],
-            disliked: [],
-        }
+    resetResponse() {
+        this.response = [
+        ];
     }
 
     createSingleMemeView(entry) {
@@ -85,21 +85,26 @@ class MemeViewer extends HTMLElement {
         })
     }
 
-    loadMoreMeme() {
-        this.data.forEach(x => {
-            this.createSingleMemeView(x);
-        });
+    async loadMoreMeme() {
+        let response = { list: this.response};
+        this.resetResponse();
+        const memes = await COMMUNICATION.query('memes',response);
+        if(memes.result == "success") {
+            memes.list.forEach(x => {
+                this.createSingleMemeView(x);
+            });
+        }
     }
 
     likeMeme(data)
     {
-        this.response.liked.push(data.id);
+        this.response.push({id: data.id,reaction: "liked"});
         console.log(this.response);
     }
 
     dislikeMeme(data)
     {
-        this.response.disliked.push(data.id);
+        this.response.push({id: data.id,reaction: "disliked"});
         console.log(this.response);
     }
 }

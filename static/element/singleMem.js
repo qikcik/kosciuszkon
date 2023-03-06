@@ -23,14 +23,14 @@ class SingleMem extends HTMLElement {
                 }
                 
                 img {
-                    width: 100%;
+                    max-width: 100%;
                     height:auto;
-                    max-height: calc(80vh);
+                    max-height: calc(70vh);
                 }
             </style>
 
             <div>
-                <img src="${this.data.url}"">
+                <img src="${this.data.img}"">
             </div>
         `;
     }

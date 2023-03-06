@@ -33,6 +33,10 @@ body {
 
 }
 
+main {
+    overflow: scroll;
+}
+
 header, nav {
     width: 100vw;
     padding: var(--def-padding);

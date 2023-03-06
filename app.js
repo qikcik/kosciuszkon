@@ -3,8 +3,10 @@ const app = express();
 
 import { Database } from 'sqlite-async';
 let createScheme = (db) => {
-    db.run(`CREATE TABLE IF NOT EXISTS user (id INTEGER PRIMARY KEY, username TEXT UNIQUE)`);
-    db.run(`CREATE TABLE IF NOT EXISTS memes (id INTEGER PRIMARY KEY, author_id INTEGER, img BLOB, FOREIGN KEY(author_id) REFERENCES user(id))`);
+    db.run(`CREATE TABLE IF NOT EXISTS user (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)`);
+    db.run(`CREATE TABLE IF NOT EXISTS meme (id INTEGER PRIMARY KEY, author_id INTEGER, img TEXT UNIQUE, FOREIGN KEY(author_id) REFERENCES user(id))`);
+    db.run(`CREATE TABLE IF NOT EXISTS reaction (id INTEGER PRIMARY KEY, reaction TEXT, meme_id INTEGER, user_id INTEGER, FOREIGN KEY(meme_id) REFERENCES meme(id),FOREIGN KEY(user_id) REFERENCES user(id))`);
+    db.run(`CREATE TABLE IF NOT EXISTS sent_meme (id INTEGER PRIMARY KEY, meme_id INTEGER, user_id INTEGER, FOREIGN KEY(meme_id) REFERENCES meme(id),FOREIGN KEY(user_id) REFERENCES user(id))`);
 }
 
 const db = await Database.open('test.db');
@@ -26,10 +28,10 @@ const getUser = async (token) => {
     return null
 }
 
+import bodyParser from 'body-parser';
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
-
-app.use(express.urlencoded({extended: true})) //middleware for parsing urlencoded data
-app.use(express.json()) // middleware for parsing incoming json
 
 app.post('/v1/auth/register', async (req, res) => {
     let username = req.body.username;
@@ -76,32 +78,52 @@ app.post('/v1/auth', async (req, res) => {
 app.post("/v1/memes", async (req, res, next) => {
     let token = req.body.token;
     let activeUser = await getUser(token);
-    console.log(activeUser);
+    console.log(req.body);
 
-    if(activeUser)
+    try
     {
-        res.json({
-            result: 'success',
-            list: [
+        if(activeUser)
+        {
+            if(req.body.list)
             {
-                id: 0,
-                url: "https://www.datavail.com/wp-content/uploads/2019/10/Week-4-winner.jpg",
-            },
-            {
-                id: 1,
-                url: "https://media.discordapp.net/attachments/902959930548551740/1073622766168854610/RDT_20221118_0140243950117114334951072.jpg",
-            },
-            {
-                id: 2,
-                url: "https://cdn.discordapp.com/attachments/805813146345275492/1070328764682207334/328043028_893135768729342_166255618862658111_n.png",
-            },
-            {
-                id: 3,
-                url: "https://cdn.discordapp.com/attachments/805813146345275492/1067039030916681788/image-6.png",
-            },
-        ]
-        });
-        return;
+                for (const x of req.body.list) {
+                    let ret = await db.run(`INSERT INTO reaction(meme_id,user_id,reaction) VALUES(?,?,?)`, [x.id,activeUser.id,x.reaction]);
+                }
+            }
+
+            let ret = await db.all(`SELECT * FROM meme WHERE id NOT IN (SELECT meme_id FROM sent_meme WHERE user_id = ?) LIMIT 3`,[activeUser.id]);
+            for (const x of ret) {
+                let ret = db.run(`INSERT INTO sent_meme(meme_id,user_id) VALUES(?,?)`, [x.id,activeUser.id]);
+                console.log(await ret);
+            }
+            res.json({result: 'success',list: ret});
+            return;
+        }
+    }
+    catch (err)
+    {
+        console.log(err);
+    }
+    res.json({result: 'failure'});
+});
+
+app.post("/v1/memes/upload", async (req, res, next) => {
+    let token = req.body.token;
+    let activeUser = await getUser(token);
+    console.log(token);
+
+    try {
+        console.log(activeUser);
+        if (activeUser && req.body.image) {
+            let ret = await db.run(`INSERT INTO meme(author_id,img) VALUES(?,?)`, [activeUser.id,req.body.image]);
+            console.log(ret);
+            res.json({result: 'success'});
+            return;
+        }
+    }
+    catch (err)
+    {
+        console.log(err);
     }
     res.json({result: 'failure'});
 });
