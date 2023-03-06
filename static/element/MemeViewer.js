@@ -4,10 +4,15 @@ class MemeViewer extends HTMLElement {
         this.Update();
     }
     async Focus() {
+        GESTURE.swipe.enable = true;
         const left = this.inner.querySelectorAll(`single-mem`);
         if(left.length < 3) {
             this.loadMoreMeme();
         }
+    }
+
+    async Defocus() {
+        GESTURE.swipe.enable = false;
     }
 
     Update() {
@@ -15,6 +20,7 @@ class MemeViewer extends HTMLElement {
             <style>
                 :host {
                     display: flex;
+                    min-height: 100%;
                 }
                 
                 single-mem {

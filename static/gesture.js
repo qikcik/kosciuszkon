@@ -2,6 +2,7 @@
 const GESTURE = {
     swipe: {
         value: 0,
+        enable: false,
         onChange_delegates: [(value) => {}], // func
         onApply_delegates: [(value) => {}], // func
         reset: () => {}, //func
@@ -31,7 +32,7 @@ const GESTURE = {
         xDown = null;
         yDown = null;
 
-        GESTURE.swipe.onApply_delegates.forEach(x => x(GESTURE.swipe.value));
+        if(GESTURE.swipe.enable) GESTURE.swipe.onApply_delegates.forEach(x => x(GESTURE.swipe.value));
     }
 
     function handleTouchMove(evt) {
@@ -49,7 +50,7 @@ const GESTURE = {
 
         if ( Math.abs( xDiff ) > ( yDiff ) ) {/*most significant*/
             GESTURE.swipe.value = -(xDiff / document.body.clientWidth);
-            GESTURE.swipe.onChange_delegates.forEach(x => x(GESTURE.swipe.value ));
+            if(GESTURE.swipe.enable) GESTURE.swipe.onChange_delegates.forEach(x => x(GESTURE.swipe.value ));
 
             //console.log(GESTURE.swipe.value);
         }

@@ -7,6 +7,10 @@ class SingleMem extends HTMLElement {
         this.data = data;
     }
 
+    async Defocus() {
+
+    }
+
     Update() {
         this.inner.innerHTML = `
             <style>
@@ -25,7 +29,7 @@ class SingleMem extends HTMLElement {
                 img {
                     max-width: 100%;
                     height:auto;
-                    max-height: calc(70vh);
+                    max-height: calc(80vh);
                 }
             </style>
 

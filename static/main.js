@@ -1,5 +1,5 @@
 (async ()=>{
-    while(true)
+    /*while(true)
     {
         let username = prompt("username");
         let password = prompt("password");
@@ -10,7 +10,9 @@
             COMMUNICATION.token = res.token;
             break;
         }
-    }
+    }*/
+
+    COMMUNICATION.token = 13;
 
     const views = [];
     const addMainView = async (el) => {
@@ -26,7 +28,13 @@
     await addMainView(element);
 
     element = document.createElement("user-viewer");
+    element.Construct(COMMUNICATION.token);
     await addMainView(element);
+
+
+    element = document.createElement("nearby-viewer");
+    await addMainView(element);
+
 
     let el = await document.querySelector(`main`);
     console.log(el);
@@ -38,7 +46,7 @@
         let btn = document.createElement("button");
         btn.innerText = x.tagName;
         btn.onclick = async () => {
-            [...el.children].forEach(x => { x.style.display = "none" });
+            [...el.children].forEach(x => { x.Defocus() ; x.style.display = "none" });
             x.style.display = "flex";
             console.log(x);
             x.Focus();

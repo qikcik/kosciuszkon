@@ -1,10 +1,13 @@
+import * as https from "https";
 import express from 'express';
+import expressSanitizer from 'express-sanitizer';
 const app = express();
+app.use(expressSanitizer());
 
 import { Database } from 'sqlite-async';
 let createScheme = (db) => {
     db.run(`CREATE TABLE IF NOT EXISTS user (id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT)`);
-    db.run(`CREATE TABLE IF NOT EXISTS meme (id INTEGER PRIMARY KEY, author_id INTEGER, img TEXT UNIQUE, FOREIGN KEY(author_id) REFERENCES user(id))`);
+    db.run(`CREATE TABLE IF NOT EXISTS meme (id INTEGER PRIMARY KEY, author_id INTEGER, img TEXT, FOREIGN KEY(author_id) REFERENCES user(id))`);
     db.run(`CREATE TABLE IF NOT EXISTS reaction (id INTEGER PRIMARY KEY, reaction TEXT, meme_id INTEGER, user_id INTEGER, FOREIGN KEY(meme_id) REFERENCES meme(id),FOREIGN KEY(user_id) REFERENCES user(id))`);
     db.run(`CREATE TABLE IF NOT EXISTS sent_meme (id INTEGER PRIMARY KEY, meme_id INTEGER, user_id INTEGER, FOREIGN KEY(meme_id) REFERENCES meme(id),FOREIGN KEY(user_id) REFERENCES user(id))`);
 }
@@ -107,6 +110,60 @@ app.post("/v1/memes", async (req, res, next) => {
     res.json({result: 'failure'});
 });
 
+app.post("/v1/memes/liked", async (req, res, next) => {
+    let token = req.body.token;
+    let activeUser = await getUser(token);
+    console.log(req.body);
+
+    try
+    {
+        if(activeUser && req.body.userId)
+        {
+            let user = await getUser(req.body.userId);
+
+            if(user)
+            {
+                let ret = await db.all(`SELECT * FROM meme INNER JOIN reaction on reaction.meme_id = meme.id WHERE reaction.reaction == "liked" and reaction.user_id = ?`,
+                    [user.id]);
+                res.json({result: 'success',list: ret});
+                return;
+            }
+        }
+    }
+    catch (err)
+    {
+        console.log(err);
+    }
+    res.json({result: 'failure'});
+});
+
+app.post("/v1/memes/uploadBy", async (req, res, next) => {
+    let token = req.body.token;
+    let activeUser = await getUser(token);
+    console.log(req.body);
+
+    try
+    {
+        if(activeUser && req.body.userId)
+        {
+            let user = await getUser(req.body.userId);
+
+            if(user)
+            {
+                let ret = await db.all(`SELECT * FROM meme WHERE author_id = ?`,
+                    [user.id]);
+                res.json({result: 'success',list: ret});
+                return;
+            }
+        }
+    }
+    catch (err)
+    {
+        console.log(err);
+    }
+    res.json({result: 'failure'});
+});
+
 app.post("/v1/memes/upload", async (req, res, next) => {
     let token = req.body.token;
     let activeUser = await getUser(token);
@@ -130,6 +187,17 @@ app.post("/v1/memes/upload", async (req, res, next) => {
 
 app.use('/static', express.static('./static'))
 
+import * as fs from 'fs'
+
+const options = {
+    key: fs.readFileSync("./config/cert.key"),
+    cert: fs.readFileSync("./config/cert.crt"),
+};
+
 app.listen(3000, () => {
     console.log("Server running on port 3000");
 });
+
+//https.createServer(options, app).listen(3000, () => {
+//    console.log(`HTTPS server started on port 3000`);
+//});

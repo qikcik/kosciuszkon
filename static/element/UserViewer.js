@@ -3,8 +3,12 @@ class UserViewer extends HTMLElement {
         this.inner = this.attachShadow({ mode: "open" });
         this.Update();
     }
-    Construct(data) {
-        this.data = data;
+    Construct(userId) {
+        this.userId = userId;
+    }
+
+    async Defocus() {
+
     }
 
     async Update() {
@@ -13,10 +17,7 @@ class UserViewer extends HTMLElement {
                 :host {
                     display: flex;
                     flex-direction: column;
-                    width: calc(100vw );
-                
-                    justify-content: center;
-                    align-items: center;
+                    min-height: 100%;
                 }
                 main {
                     width: fit-content;               
@@ -35,26 +36,43 @@ class UserViewer extends HTMLElement {
             </style>
             
             <h2 style="text-align: left">uploaded meme</h2>
-            <main>
-                    <img src="https://cdn.discordapp.com/attachments/1080781736943812618/1081926179155615764/316841207_1986559981735714_8114431435510898845_n.png">
-                    <img src="https://cdn.discordapp.com/attachments/1080781736943812618/1081926179155615764/316841207_1986559981735714_8114431435510898845_n.png">
-                    <img src="https://cdn.discordapp.com/attachments/1080781736943812618/1081926179155615764/316841207_1986559981735714_8114431435510898845_n.png">
-                    <img src="https://cdn.discordapp.com/attachments/1080781736943812618/1081926179155615764/316841207_1986559981735714_8114431435510898845_n.png">
-                    <img src="https://cdn.discordapp.com/attachments/1080781736943812618/1081926179155615764/316841207_1986559981735714_8114431435510898845_n.png">
+            <main id="uploaded">
             </main>
             <h2 style="text-align: left">Liked meme</h2>
-            <main>
-                    <img src="https://cdn.discordapp.com/attachments/1080781736943812618/1081926179155615764/316841207_1986559981735714_8114431435510898845_n.png">
-                    <img src="https://cdn.discordapp.com/attachments/1080781736943812618/1081926179155615764/316841207_1986559981735714_8114431435510898845_n.png">
-                    <img src="https://cdn.discordapp.com/attachments/1080781736943812618/1081926179155615764/316841207_1986559981735714_8114431435510898845_n.png">
-                    <img src="https://cdn.discordapp.com/attachments/1080781736943812618/1081926179155615764/316841207_1986559981735714_8114431435510898845_n.png">
-                    <img src="https://cdn.discordapp.com/attachments/1080781736943812618/1081926179155615764/316841207_1986559981735714_8114431435510898845_n.png">
+            <main id="liked">
             </main>
 
         `;
+
+        this.updateLiked();
+        this.updateUploaded();
+    }
+
+    async updateLiked() {
+        const memes = await COMMUNICATION.query('memes/liked', {userId: COMMUNICATION.token});
+        if(memes.result == "success")
+        {
+            memes.list.forEach(x => {
+                let img = document.createElement("img");
+                img.src = x.img;
+                this.inner.querySelector(`#liked`).appendChild(img);
+            })
+        }
+    }
+
+    async updateUploaded() {
+        const memes = await COMMUNICATION.query('memes/uploadBy', {userId: this.userId});
+        if(memes.result == "success")
+        {
+            memes.list.forEach(x => {
+                let img = document.createElement("img");
+                img.src = x.img;
+                this.inner.querySelector(`#uploaded`).appendChild(img);
+            })
+        }
     }
     async Focus() {
-
+        this.Update()
     }
 }
 

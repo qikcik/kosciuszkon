@@ -50,6 +50,10 @@ class UploadMeme extends HTMLElement {
 
     }
 
+    async Defocus() {
+
+    }
+
     async selectFile(contentType, multiple){
         return new Promise(resolve => {
             let input = document.createElement('input');
