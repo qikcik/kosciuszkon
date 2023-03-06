@@ -1,8 +1,9 @@
 {
+  "type": "module",
   "name": "kosciuszkon",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "sqlite-async": "^1.2.0",
+    "sqlite3": "^5.1.4"
   }
 }
