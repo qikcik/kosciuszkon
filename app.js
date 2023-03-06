@@ -1,8 +1,6 @@
 import * as https from "https";
 import express from 'express';
-import expressSanitizer from 'express-sanitizer';
 const app = express();
-app.use(expressSanitizer());
 
 import { Database } from 'sqlite-async';
 let createScheme = (db) => {
