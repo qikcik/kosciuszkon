@@ -1,6 +1,7 @@
-import * as https from "https";
 import express from 'express';
+import expressSanitizer from 'express-sanitizer';
 const app = express();
+app.use(expressSanitizer());
 
 import { Database } from 'sqlite-async';
 let createScheme = (db) => {
@@ -195,7 +196,3 @@ const options = {
 app.listen(3000, () => {
     console.log("Server running on port 3000");
 });
-
-//https.createServer(options, app).listen(3000, () => {
-//    console.log(`HTTPS server started on port 3000`);
-//});
