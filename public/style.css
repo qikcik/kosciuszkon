@@ -1,0 +1,44 @@
+:root {
+    --bg-color: #333;
+    --font-color: #FFFFFF;
+
+
+    --second-bg-color: #222222;
+
+    --element-fill-color: #000000;
+
+    --def-padding: 2rem;
+}
+
+
+* {
+    box-sizing: border-box;
+    margin: 0rem;
+    padding: 0rem;
+
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100vw;
+    height: 100vh;
+
+    background-color: var(--bg-color);
+    color: var(--font-color);
+
+}
+
+header, nav {
+    width: 100vw;
+    padding: var(--def-padding);
+
+    text-align: center;
+
+    background-color: var(--second-bg-color);
+}
+
